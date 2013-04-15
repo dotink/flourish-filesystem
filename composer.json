@@ -1,0 +1,21 @@
+{
+	"name": "dotink/flourish-filesystem",
+	"description": "Easy way to work with files and directories",
+	"keywords": ["file", "filesystem", "directory"],
+	"license": "AGPL 3.0",
+	"authors": [
+		{
+			"name": "Matthew J. Sahagian",
+			"email": "msahagian@dotink.org",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=5.4.0",
+		"imarc/tails": "*",
+		"dotink/flourish-core": "dev-master"
+	},
+	"autoload": {
+		"classmap": ["src/"]
+	}
+}
