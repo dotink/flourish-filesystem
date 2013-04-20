@@ -3,6 +3,7 @@
 	"description": "Easy way to work with files and directories",
 	"keywords": ["file", "filesystem", "directory"],
 	"license": "AGPL 3.0",
+	"type": "opus-package",
 	"authors": [
 		{
 			"name": "Matthew J. Sahagian",
@@ -18,7 +19,7 @@
 		"classmap": ["src/"]
 	},
 	"extra": {
-		"tails": {
+		"opus": {
 			"inkwell-2.0": {
 				"src": "library/flourish"
 			}
