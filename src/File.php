@@ -393,6 +393,9 @@
 				case 'js':
 					return 'application/javascript';
 
+				case 'json':
+					return 'application/json';
+
 				case 'php':
 				case 'php3':
 				case 'php4':
