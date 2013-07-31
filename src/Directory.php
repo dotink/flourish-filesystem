@@ -8,7 +8,7 @@
 	 * @author     Will Bond, iMarc LLC [wb-imarc] <will@imarc.net>
 	 * @author     Matthew J. Sahagian [mjs] <msahagian@dotink.org>
 	 *
-	 * @license    http://flourishlib.com/license
+	 * @license    Please see the LICENSE file at the root of this distribution
 	 *
 	 * @package    Flourish
 	 */

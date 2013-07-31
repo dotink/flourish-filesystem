@@ -2,7 +2,7 @@
 ## Handles filesystem-level tasks including filesystem transactions and the reference map to keep all fFile and fDirectory objects in sync
 
 _Copyright (c) 2008-2010 Will Bond, others_.
-[http://flourishlib.com/license](http://flourishlib.com/license)
+_Please see the LICENSE file at the root of this distribution_
 
 #### Namespace
 
