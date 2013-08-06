@@ -33,6 +33,14 @@
 
 
 		/**
+		 * The file handle for iteration
+		 *
+		 * @var resource
+		 */
+		private $file_handle = NULL;
+
+
+		/**
 		 * A backtrace from when the file was deleted
 		 *
 		 * @var array
@@ -52,78 +60,15 @@
 		 *
 		 * @var string
 		 */
-		protected $file;
+		protected $file = NULL;
 
 
 		/**
-		 * The file handle for iteration
+		 * The file name mask
 		 *
-		 * @var resource
+		 * @var string
 		 */
-		private $file_handle = NULL;
-
-
-		/**
-		 * Determines the file's mime type by looking at the contents or matching the extension
-		 *
-		 * Please see the ::getMimeType() description for details about how the mime type is
-		 * determined and what mime types are detected.
-		 *
-		 * @param string $file The file to check the mime type for
-		 * @param string $contents The first 4096 bytes of the file content
-		 * @return string The mime type of the file
-		 */
-		static public function determineMimeType($file, $contents = NULL)
-		{
-			$extension = strtolower(Filesystem::getPathInfo($file, 'extension'));
-
-			//
-			// If the file doesn't exist, we're working with the extension only
-			//
-
-			if (!file_exists($file)) {
-				return self::determineMimeTypeByExtension($extension);
-			}
-
-			//
-			// If no contents are provided, we must get them
-			//
-
-			if ($contents === NULL) {
-				//
-				// The first 4k should be enough for content checking
-				//
-
-				$handle   = fopen($file, 'r');
-				$contents = fread($handle, 4096);
-				fclose($handle);
-			}
-
-			//
-			// Each token represents an escaped RegEx of what we'd be looking for in terms of
-			// easily identifiable tokens.
-			//
-
-			$tokens = [
-				'[\x00-\x08\x0B\x0C\x0E-\x1F]',            // Low ASCII chars
-				'%PDF-',                                   // PDF
-				'<\?php',                                  // PHP
-				'\%\!PS-Adobe-3',                          // Photoshop
-				'<\?xml',                                  // XML
-				'\{\\\\rtf',                               // RTF
-				'<\?=',                                    // Short PHP
-				'<html',                                   // HTML
-				'<\!doctype',                              // HTML
-				'<rss',                                    // RSS
-				'\#\![/a-z0-9]+(python|ruby|perl|php)\b',  // Shell Scripts
-			];
-
-			if (!preg_match('#' . implode('|', $tokens) . '#i', $contents)) {
-				return self::determineMimeTypeByExtension($extension);
-			}
-
-			return self::determineMimeTypeByContents($contents, $extension);
-		}
+		protected $mask = NULL;
 
 
 		/**
@@ -157,11 +102,11 @@
 				return 'image/gif';
 			}
 
-			if ($_0_2 == 'BM' && $length > 14 && in_array($content[14], array("\x0C", "\x28", "\x40", "\x80"))) {
+			if ($_0_2 == 'BM' && $length > 14 && in_array($content[14], ["\x0C", "\x28", "\x40", "\x80"])) {
 				return 'image/x-ms-bmp';
 			}
 
-			$normal_jpeg    = $length > 10 && in_array(substr($content, 6, 4), array('JFIF', 'Exif'));
+			$normal_jpeg    = $length > 10 && in_array(substr($content, 6, 4), ['JFIF', 'Exif']);
 			$photoshop_jpeg = $length > 24 && $_0_4 == "\xFF\xD8\xFF\xED" && substr($content, 20, 4) == '8BIM';
 			if ($normal_jpeg || $photoshop_jpeg) {
 				return 'image/jpeg';
@@ -433,6 +378,95 @@
 
 
 		/**
+		 *
+		 */
+		static private function getFileHeader($filename)
+		{
+			if (file_exists($filename)) {
+				$handle   = fopen($filename, 'r');
+				$contents = fread($handle, 4096);
+				fclose($handle);
+
+			} else {
+				$contents = '';
+			}
+
+			return $contents;
+		}
+
+
+		/**
+		 * Determines the file's mime type by looking at the contents or matching the extension
+		 *
+		 * Please see the ::getMimeType() description for details about how the mime type is
+		 * determined and what mime types are detected.
+		 *
+		 * @param string $file The file to check the mime type for
+		 * @param string $contents The first 4096 bytes of the file content
+		 * @return string The mime type of the file
+		 */
+		static public function determineMimeType($file, $contents = NULL)
+		{
+			$extension = strtolower(Filesystem::getPathInfo($file, 'extension'));
+
+			//
+			// If the file doesn't exist, we're working with the extension only
+			//
+
+			if ($contents === NULL) {
+				if (!file_exists($file)) {
+					return self::determineMimeTypeByExtension($extension);
+				} else {
+					$contents = self::getFileHeader($file);
+				}
+			}
+
+			//
+			// Each token represents an escaped RegEx of what we'd be looking for in terms of
+			// easily identifiable tokens.
+			//
+
+			$tokens = [
+				'[\x00-\x08\x0B\x0C\x0E-\x1F]',            // Low ASCII chars
+				'%PDF-',                                   // PDF
+				'<\?php',                                  // PHP
+				'\%\!PS-Adobe-3',                          // Photoshop
+				'<\?xml',                                  // XML
+				'\{\\\\rtf',                               // RTF
+				'<\?=',                                    // Short PHP
+				'<html',                                   // HTML
+				'<\!doctype',                              // HTML
+				'<rss',                                    // RSS
+				'\#\![/a-z0-9]+(python|ruby|perl|php)\b',  // Shell Scripts
+			];
+
+			if (!preg_match('#' . implode('|', $tokens) . '#i', $contents)) {
+				return self::determineMimeTypeByExtension($extension);
+			}
+
+			return self::determineMimeTypeByContents($contents, $extension);
+		}
+
+
+		/**
+		 * Throws a ProgrammerException if the file has been deleted
+		 *
+		 * @return void
+		 */
+		protected function tossIfDeleted()
+		{
+			if ($this->deleted) {
+				throw new ProgrammerException(
+					'Cannot perform requested action; the file has been deleted' . "\n\n" .
+					'Backtrace for File::delete() call:' . "\n" .
+					'%s',
+					Core::backtrace(0, $this->deleted)
+				);
+			}
+		}
+
+
+		/**
 		 * Duplicates a file in the current directory when the object is cloned
 		 *
 		 * @internal
@@ -447,7 +481,7 @@
 
 			if (!$directory->isWritable()) {
 				throw new EnvironmentException(
-					'The file count not be cloned because the containing directory, %s, is not writable',
+					'The file could not be cloned.  Parent directory, %s, is not writable',
 					$directory
 				);
 			}
@@ -459,6 +493,7 @@
 
 			$this->file    =& Filesystem::hookFilenameMap($file);
 			$this->deleted =& Filesystem::hookDeletedMap($file);
+			$this->exists  =& Filesystem::hookExistsMap($file);
 
 			if (Filesystem::isInsideTransaction()) {
 				Filesystem::recordDuplicate($this);
@@ -903,7 +938,7 @@
 		{
 			$this->tossIfDeleted();
 
-			return self::determineMimeType($this->file);
+			return self::determineMimeType($this->getName(), self::getFileHeader($this->file));
 		}
 
 
@@ -933,7 +968,12 @@
 			// minus the extension.
 			//
 
-			return Filesystem::getPathInfo($this->file, $remove_extension ? 'filename' : 'basename');
+			return Filesystem::getPathInfo(
+				$this->mask ?: $this->file,
+				$remove_extension
+					? 'filename'
+					: 'basename'
+			);
 		}
 
 
@@ -1030,6 +1070,19 @@
 			}
 
 			return $this->current_line_number;
+		}
+
+
+		/**
+		 * Masks the filename for certain operations.
+		 *
+		 * @access public
+		 * @param string $name The masked filename to use
+		 * @return void
+		 */
+		public function mask($name)
+		{
+			$this->mask = $name;
 		}
 
 
@@ -1252,24 +1305,6 @@
 
 			if ($this->file_handle !== NULL) {
 				rewind($this->file_handle);
-			}
-		}
-
-
-		/**
-		 * Throws a ProgrammerException if the file has been deleted
-		 *
-		 * @return void
-		 */
-		protected function tossIfDeleted()
-		{
-			if ($this->deleted) {
-				throw new ProgrammerException(
-					'Cannot perform requested action; the file has been deleted' . "\n\n" .
-					'Backtrace for File::delete() call:' . "\n" .
-					'%s',
-					Core::backtrace(0, $this->deleted)
-				);
 			}
 		}
 
