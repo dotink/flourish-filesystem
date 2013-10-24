@@ -80,6 +80,10 @@ The current line of the file
 
 The current line number of the file
 
+#### <span style="color:#6a6e3d;">$file_handle</span>
+
+The file handle for iteration
+
 #### <span style="color:#6a6e3d;">$deleted</span>
 
 A backtrace from when the file was deleted
@@ -92,79 +96,15 @@ Whether or not the file exists
 
 The full path to the file
 
-#### <span style="color:#6a6e3d;">$file_handle</span>
+#### <span style="color:#6a6e3d;">$mask</span>
 
-The file handle for iteration
+The file name mask
 
 
 
 
 ## Methods
 ### Static Methods
-<hr />
-
-#### <span style="color:#3e6a6e;">determineMimeType()</span>
-
-Determines the file's mime type by looking at the contents or matching the extension
-
-##### Details
-
-Please see the ::getMimeType() description for details about how the mime type is
-determined and what mime types are detected.
-
-###### Parameters
-
-<table>
-	<thead>
-		<th>Name</th>
-		<th>Type(s)</th>
-		<th>Description</th>
-	</thead>
-	<tbody>
-			
-		<tr>
-			<td>
-				$file
-			</td>
-			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
-				
-			</td>
-			<td>
-				The file to check the mime type for
-			</td>
-		</tr>
-					
-		<tr>
-			<td>
-				$contents
-			</td>
-			<td>
-									<a href="http://www.php.net/language.types.string.php">string</a>
-				
-			</td>
-			<td>
-				The first 4096 bytes of the file content
-			</td>
-		</tr>
-			
-	</tbody>
-</table>
-
-###### Returns
-
-<dl>
-	
-		<dt>
-			string
-		</dt>
-		<dd>
-			The mime type of the file
-		</dd>
-	
-</dl>
-
-
 <hr />
 
 #### <span style="color:#3e6a6e;">determineMimeTypeByContents()</span>
@@ -270,9 +210,98 @@ Uses the extension of the all-text file to determine the mime type
 </dl>
 
 
+<hr />
+
+#### <span style="color:#3e6a6e;">getFileHeader()</span>
+
+
+<hr />
+
+#### <span style="color:#3e6a6e;">determineMimeType()</span>
+
+Determines the file's mime type by looking at the contents or matching the extension
+
+##### Details
+
+Please see the ::getMimeType() description for details about how the mime type is
+determined and what mime types are detected.
+
+###### Parameters
+
+<table>
+	<thead>
+		<th>Name</th>
+		<th>Type(s)</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+			
+		<tr>
+			<td>
+				$file
+			</td>
+			<td>
+									<a href="http://www.php.net/language.types.string.php">string</a>
+				
+			</td>
+			<td>
+				The file to check the mime type for
+			</td>
+		</tr>
+					
+		<tr>
+			<td>
+				$contents
+			</td>
+			<td>
+									<a href="http://www.php.net/language.types.string.php">string</a>
+				
+			</td>
+			<td>
+				The first 4096 bytes of the file content
+			</td>
+		</tr>
+			
+	</tbody>
+</table>
+
+###### Returns
+
+<dl>
+	
+		<dt>
+			string
+		</dt>
+		<dd>
+			The mime type of the file
+		</dd>
+	
+</dl>
+
+
 
 
 ### Instance Methods
+<hr />
+
+#### <span style="color:#3e6a6e;">tossIfDeleted()</span>
+
+Throws a ProgrammerException if the file has been deleted
+
+###### Returns
+
+<dl>
+	
+		<dt>
+			void
+		</dt>
+		<dd>
+			Provides no return value.
+		</dd>
+	
+</dl>
+
+
 <hr />
 
 #### <span style="color:#3e6a6e;">__clone()</span>
@@ -1081,6 +1110,52 @@ Returns the current one-based line number (required by iterator interface)
 
 <hr />
 
+#### <span style="color:#3e6a6e;">mask()</span>
+
+Masks the filename for certain operations.
+
+###### Parameters
+
+<table>
+	<thead>
+		<th>Name</th>
+		<th>Type(s)</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+			
+		<tr>
+			<td>
+				$name
+			</td>
+			<td>
+									<a href="http://www.php.net/language.types.string.php">string</a>
+				
+			</td>
+			<td>
+				The masked filename to use
+			</td>
+		</tr>
+			
+	</tbody>
+</table>
+
+###### Returns
+
+<dl>
+	
+		<dt>
+			void
+		</dt>
+		<dd>
+			Provides no return value.
+		</dd>
+	
+</dl>
+
+
+<hr />
+
 #### <span style="color:#3e6a6e;">move()</span>
 
 Moves the current file to a different directory
@@ -1394,26 +1469,6 @@ rolled back.
 #### <span style="color:#3e6a6e;">rewind()</span>
 
 Rewinds the file handle (required by iterator interface)
-
-###### Returns
-
-<dl>
-	
-		<dt>
-			void
-		</dt>
-		<dd>
-			Provides no return value.
-		</dd>
-	
-</dl>
-
-
-<hr />
-
-#### <span style="color:#3e6a6e;">tossIfDeleted()</span>
-
-Throws a ProgrammerException if the file has been deleted
 
 ###### Returns
 

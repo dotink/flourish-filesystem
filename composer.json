@@ -2,7 +2,7 @@
 	"name": "dotink/flourish-filesystem",
 	"description": "Easy way to work with files and directories",
 	"keywords": ["file", "filesystem", "directory"],
-	"license": "AGPL 3.0",
+	"license": "AGPL-3.0",
 	"type": "opus-package",
 	"authors": [
 		{
